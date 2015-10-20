@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket示例</title>
+  <style type="text/css">
+  .main {
+    margin: 0 auto;
+    text-align: center;
+  }
+  canvas {
+    border-style: solid;
+    border-width: 1px;
+  }
+  </style>
+</head>
+<body>
+<div class="main">
+  <h3>画布</h3>
+  <canvas id="content" height="200" widht="300"></canvas>
+</div>
+
+<script type="text/javascript">
+  var wsServer = 'ws://localhost/wsDemo';
+  var websocket = new WebSocket(wsServer);
+  websocket.onopen = function() {
+    console.log("Connected to WebSocket server");
+  };
+  websocket.onclose = function (evt) { 
+    console.log("Disconnected!");
+  }; 
+  websocket.onmessage = function(evt) {
+    console.log('Retrieved data from server: ' + evt.data);
+    drawRect(evt.data);
+  };
+  websocket.onerror = function (evt) { 
+    console.log('Error occured: ' + evt.data); 
+  };
+
+  var canvas=document.getElementById('content');
+  canvas.addEventListener("click", function (evt) {
+    var mousePos = getMousePos(canvas, evt);
+    var posJson = JSON.stringify(mousePos);
+    console.log(mousePos.x +',' + mousePos.y);
+    websocket.send(posJson);
+   }, false);
+
+  // 获取鼠标坐标，只保留整数部分
+  function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: parseInt(evt.clientX - rect.left),
+      y: parseInt(evt.clientY - rect.top)
+    };
+  }
+
+  function drawRect(color) {
+    var ctx=canvas.getContext('2d');
+    ctx.fillStyle=color;
+    ctx.fillRect(0,0,80,100);
+  }
+
+</script>
+</body>
+</html>
