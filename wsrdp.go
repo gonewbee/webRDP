@@ -57,7 +57,7 @@ func wsHandler(ws *websocket.Conn) {
 	wsClosed := make(chan bool)
 
 	context := Rdp_new()
-	ct := *(*chan int)(C.getWSChan(context))
+	ct := *(*chan string)(C.getWSChan(context))
 	setRdpInfo(context)
 	go Rdp_start(context)
 
@@ -75,10 +75,11 @@ forLoop:
 				break
 			}
 			// 根据坐标回复颜色值
-			msg1 = "#" + strconv.FormatInt(int64(pos.X*10), 16) + strconv.FormatInt(int64(pos.Y*10), 16)
-			websocket.Message.Send(ws, msg1)
+			// msg1 = "#" + strconv.FormatInt(int64(pos.X*10), 16) + strconv.FormatInt(int64(pos.Y*10), 16)
+			// websocket.Message.Send(ws, msg1)
 		case msg2 := <-ct:
-			log.Printf("ct receive:%d", msg2)
+			log.Printf("ct receive:" + msg2)
+			websocket.Message.Send(ws, msg2)
 		case <-wsClosed:
 			log.Printf("wsClosed")
 			break forLoop

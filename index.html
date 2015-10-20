@@ -8,16 +8,12 @@
     margin: 0 auto;
     text-align: center;
   }
-  canvas {
-    border-style: solid;
-    border-width: 1px;
-  }
   </style>
 </head>
 <body>
 <div class="main">
   <h3>画布</h3>
-  <canvas id="content" height="200" widht="300"></canvas>
+  <canvas id="content" width="1025px" height="769px"></canvas>
 </div>
 
 <script type="text/javascript">
@@ -54,10 +50,13 @@
     };
   }
 
-  function drawRect(color) {
+  function drawRect(data) {
     var ctx=canvas.getContext('2d');
-    ctx.fillStyle=color;
-    ctx.fillRect(0,0,80,100);
+    var x = parseInt(data.substring(0,4),16);
+    var y = parseInt(data.substring(4,8),16);
+    var w = parseInt(data.substring(8,12),16);
+    var h = parseInt(data.substring(12),16);
+    ctx.strokeRect(x+0.5,y+0.5,w,h);
   }
 
 </script>

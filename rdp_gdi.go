@@ -52,6 +52,7 @@ static void *getWSChan(rdpContext* context) {
 */
 import "C"
 import (
+	"fmt"
 	"log"
 )
 
@@ -70,9 +71,10 @@ func webRDPdesktop_resize(context *C.rdpContext) C.BOOL {
 //export webRDPdstblt
 func webRDPdstblt(context *C.rdpContext, dstblt *C.DSTBLT_ORDER) C.BOOL {
 	log.Println("webRDPdstblt")
-	t := (*chan int)(C.getWSChan(context))
+	t := (*chan string)(C.getWSChan(context))
 	log.Printf("t:%p", t)
-	*t <- 1
+	s := fmt.Sprintf("%04x%04x%04x%04x", dstblt.nLeftRect, dstblt.nTopRect, dstblt.nWidth, dstblt.nHeight)
+	*t <- s
 	return C.TRUE
 }
 

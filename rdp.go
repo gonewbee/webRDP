@@ -232,7 +232,7 @@ func webfreerdp_client_global_uninit() {
 //export webfreerdp_client_new
 func webfreerdp_client_new(instance *C.freerdp, context *C.rdpContext) C.BOOL {
 	log.Println("webfreerdp_client_new")
-	wschan := make(chan int)
+	wschan := make(chan string)
 	C.setFuncInClient(instance, context, unsafe.Pointer(&wschan))
 	return C.TRUE
 }
