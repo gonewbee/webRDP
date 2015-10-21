@@ -45,6 +45,12 @@ static void web_gdi_register_update_callbacks(rdpUpdate* update) {
 	primary->EllipseSC = NULL;
 	primary->EllipseCB = NULL;
 }
+
+static webContext* convert2webContext(rdpContext* context) {
+	webContext* xfc = (webContext*) context;
+	return xfc;
+}
+
 static void *getWSChan(rdpContext* context) {
 	webContext* xfc = (webContext*) context;
 	return xfc->wsChan;
@@ -73,7 +79,7 @@ func webRDPdstblt(context *C.rdpContext, dstblt *C.DSTBLT_ORDER) C.BOOL {
 	log.Println("webRDPdstblt")
 	t := (*chan string)(C.getWSChan(context))
 	log.Printf("t:%p", t)
-	s := fmt.Sprintf("%04x%04x%04x%04x", dstblt.nLeftRect, dstblt.nTopRect, dstblt.nWidth, dstblt.nHeight)
+	s := fmt.Sprintf("01%04x%04x%04x%04x", dstblt.nLeftRect, dstblt.nTopRect, dstblt.nWidth, dstblt.nHeight)
 	*t <- s
 	return C.TRUE
 }
@@ -99,6 +105,12 @@ func webRDPmemblt(context *C.rdpContext, memblt *C.MEMBLT_ORDER) C.BOOL {
 //export webRDPopaquerect
 func webRDPopaquerect(context *C.rdpContext, opaque_rect *C.OPAQUE_RECT_ORDER) C.BOOL {
 	log.Println("webRDPopaquerect")
+	color := C.freerdp_color_convert_var(opaque_rect.color, 32, 32, C.convert2webContext(context).clrconv)
+	log.Printf("webRDPopaquerect:%x==>%x", opaque_rect.color, color)
+	t := (*chan string)(C.getWSChan(context))
+	log.Printf("t:%p", t)
+	s := fmt.Sprintf("02#%06x%04x%04x%04x%04x", opaque_rect.color, opaque_rect.nLeftRect, opaque_rect.nTopRect, opaque_rect.nWidth, opaque_rect.nHeight)
+	*t <- s
 	return C.TRUE
 }
 

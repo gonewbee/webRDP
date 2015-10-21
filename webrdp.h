@@ -6,6 +6,7 @@
 
 typedef struct {
 	rdpContext context;
+	HCLRCONV clrconv;
 	void *wsChan;
 } webContext;
 

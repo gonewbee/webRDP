@@ -27,7 +27,14 @@
   }; 
   websocket.onmessage = function(evt) {
     console.log('Retrieved data from server: ' + evt.data);
-    drawRect(evt.data);
+    switch(evt.data.substring(0,2)) {
+      case "01":
+        drawRect(evt.data.substring(2));
+        break;
+      case "02":
+        fillRect(evt.data.substring(2, 9), evt.data.substring(9));
+        break;
+    }
   };
   websocket.onerror = function (evt) { 
     console.log('Error occured: ' + evt.data); 
@@ -48,6 +55,26 @@
       x: parseInt(evt.clientX - rect.left),
       y: parseInt(evt.clientY - rect.top)
     };
+  }
+
+  function argb2rgba(argb) {
+    var a = parseInt(argb.substring(0,2),16)/255;
+    var r = argb.substring(2,4);
+    var g = argb.substring(4,6);
+    var b = argb.substring(6);
+    var rgba = "rgba("+r+","+g+","+b+"," + a + ")";
+    console.log(rgba);
+    return rgba;
+  }
+
+  function fillRect(color, data) {
+    var ctx=canvas.getContext('2d');
+    var x = parseInt(data.substring(0,4),16);
+    var y = parseInt(data.substring(4,8),16);
+    var w = parseInt(data.substring(8,12),16);
+    var h = parseInt(data.substring(12),16);
+    ctx.fillStyle = color;
+    ctx.fillRect(x+0.5,y+0.5,w,h);
   }
 
   function drawRect(data) {

@@ -49,6 +49,7 @@ static int RdpClientEntry(RDP_CLIENT_ENTRY_POINTS* pEntryPoints) {
 static void setFuncInClient(freerdp *instance, rdpContext* context, void *wsChan) {
 	webContext* xfc = (webContext*) instance->context;
 	xfc->wsChan = wsChan;
+	xfc->clrconv = freerdp_clrconv_new(CLRCONV_ALPHA|CLRCONV_INVERT);
 	context->channels = freerdp_channels_new();
 	instance->PreConnect = web_pre_connect;
 	instance->PostConnect = web_post_connect;
@@ -61,7 +62,7 @@ static void web_pre_connect_set(freerdp *instance) {
 	settings = instance->settings;
 	settings->RemoteFxCodec = 0;
     settings->FastPathOutput = 1;
-    settings->ColorDepth = 16;
+    settings->ColorDepth = 32;//16;
     settings->FrameAcknowledge = 1;
     settings->LargePointerFlag = 1;
     settings->BitmapCacheV3Enabled = 0;
