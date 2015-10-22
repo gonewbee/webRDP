@@ -8,6 +8,7 @@ typedef struct {
 	rdpContext context;
 	HCLRCONV clrconv;
 	void *wsChan;
+	UINT32 palette[256];
 } webContext;
 
 typedef struct web_rdp_bitmap {

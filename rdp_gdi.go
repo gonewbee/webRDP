@@ -46,7 +46,7 @@ static void web_gdi_register_update_callbacks(rdpUpdate* update) {
 	primary->EllipseCB = NULL;
 }
 
-static webContext* convert2webContext(rdpContext* context) {
+static webContext* convert2webContextC(rdpContext* context) {
 	webContext* xfc = (webContext*) context;
 	return xfc;
 }
@@ -61,6 +61,10 @@ import (
 	"fmt"
 	"log"
 )
+
+func convert2webContext(context *C.rdpContext) *C.webContext {
+	return C.convert2webContextC(context)
+}
 
 //export webRDPend_paint
 func webRDPend_paint(context *C.rdpContext) C.BOOL {
@@ -105,7 +109,7 @@ func webRDPmemblt(context *C.rdpContext, memblt *C.MEMBLT_ORDER) C.BOOL {
 //export webRDPopaquerect
 func webRDPopaquerect(context *C.rdpContext, opaque_rect *C.OPAQUE_RECT_ORDER) C.BOOL {
 	log.Println("webRDPopaquerect")
-	color := C.freerdp_color_convert_var(opaque_rect.color, 32, 32, C.convert2webContext(context).clrconv)
+	color := C.freerdp_color_convert_var(opaque_rect.color, 32, 32, convert2webContext(context).clrconv)
 	log.Printf("webRDPopaquerect:%x==>%x", opaque_rect.color, color)
 	t := (*chan string)(C.getWSChan(context))
 	log.Printf("t:%p", t)
