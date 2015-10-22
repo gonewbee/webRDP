@@ -17,8 +17,9 @@
 </div>
 
 <script type="text/javascript">
-  var wsServer = 'ws://localhost/wsDemo';
+  var wsServer = "ws://"+window.location.host+"/wsDemo";
   var websocket = new WebSocket(wsServer);
+  websocket.binaryType = "arraybuffer";
   websocket.onopen = function() {
     console.log("Connected to WebSocket server");
   };
@@ -27,12 +28,13 @@
   }; 
   websocket.onmessage = function(evt) {
     console.log('Retrieved data from server: ' + evt.data);
-    switch(evt.data.substring(0,2)) {
+    var info = JSON.parse(evt.data)
+    switch(info.type) {
       case "01":
-        drawRect(evt.data.substring(2));
+        drawRect(info.pos);
         break;
       case "02":
-        fillRect(evt.data.substring(2, 9), evt.data.substring(9));
+        fillRect(info.color, info.pos);
         break;
     }
   };

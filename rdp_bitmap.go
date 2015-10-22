@@ -14,13 +14,7 @@ static BYTE* getBYTEpalette(rdpContext* context) {
 */
 import "C"
 import (
-	"bufio"
-	"bytes"
-	"golang.org/x/image/bmp"
-	"image/png"
 	"log"
-	"os"
-	"time"
 	"unsafe"
 )
 
@@ -28,22 +22,7 @@ import (
 func webRdpBitmapNew(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 	log.Println("webRdpBitmapNew")
 	if bitmap.data != nil {
-		// l := C.getsizeof(bitmap.data)
-		log.Printf("webRdpBitmapNew length::%d", bitmap.length)
-		r := bytes.NewReader(C.GoBytes(unsafe.Pointer(bitmap.data), C.int(bitmap.length)))
-		image, err := bmp.Decode(r)
-		if err != nil {
-			log.Println("webRdpBitmapNew Decode error--------------")
-			return C.TRUE
-		}
-		t := time.Now().Format("20060102150405")
-		fo, err := os.Create("tmp/" + t)
-		defer fo.Close()
-		w := bufio.NewWriter(fo)
-		e := png.Encode(w, image)
-		if e != nil {
-			log.Println("webRdpBitmapNew Encode error=============")
-		}
+		log.Println("try to use")
 	}
 	return C.TRUE
 }
@@ -51,6 +30,7 @@ func webRdpBitmapNew(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 //export webRdpBitmapFree
 func webRdpBitmapFree(context *C.rdpContext, bitmap *C.rdpBitmap) {
 	log.Println("webRdpBitmapFree")
+	C._aligned_free(unsafe.Pointer(bitmap.data))
 }
 
 //export webRdpBitmapPaint
@@ -89,6 +69,6 @@ func webRdpBitmapDecompress(context *C.rdpContext, bitmap *C.rdpBitmap, data *C.
 
 //export webRdpBitmapSetSurface
 func webRdpBitmapSetSurface(context *C.rdpContext, bitmap *C.rdpBitmap, primary C.BOOL) C.BOOL {
-	log.Println("webRdpBitmapDecompress")
+	log.Println("webRdpBitmapSetSurface")
 	return C.TRUE
 }

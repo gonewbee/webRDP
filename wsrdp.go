@@ -23,12 +23,19 @@ type mousePos struct {
 	Y int `json:"y"`
 }
 
+type RdpDrawInfo struct {
+	Type  string `json:"type"`
+	Color string `json:"color,omitempty"`
+	Pos   string `json:"pos"`
+}
+
 func wsWorker(ws *websocket.Conn, msg chan<- string, wsClosed chan<- bool) {
 	var message string
 	for nil == websocket.Message.Receive(ws, &message) {
 		log.Println("receive:" + message)
 		msg <- message
 	}
+	log.Println("wsWorker websocket error")
 	wsClosed <- true
 	log.Println("wsWorker end=========")
 }
@@ -57,7 +64,7 @@ func wsHandler(ws *websocket.Conn) {
 	wsClosed := make(chan bool)
 
 	context := Rdp_new()
-	ct := *(*chan string)(C.getWSChan(context))
+	ct := *(*chan RdpDrawInfo)(C.getWSChan(context))
 	setRdpInfo(context)
 	go Rdp_start(context)
 
@@ -77,9 +84,15 @@ forLoop:
 			// 根据坐标回复颜色值
 			// msg1 = "#" + strconv.FormatInt(int64(pos.X*10), 16) + strconv.FormatInt(int64(pos.Y*10), 16)
 			// websocket.Message.Send(ws, msg1)
-		case msg2 := <-ct:
-			log.Printf("ct receive:" + msg2)
-			websocket.Message.Send(ws, msg2)
+		case info := <-ct:
+			s, err := json.Marshal(info)
+			if err != nil {
+				log.Println("Marshal info error!!!")
+			} else {
+				str := string(s)
+				log.Println("ct receive:" + str)
+				websocket.Message.Send(ws, str)
+			}
 		case <-wsClosed:
 			log.Printf("wsClosed")
 			break forLoop
@@ -89,7 +102,9 @@ forLoop:
 }
 
 func main() {
+	port := "8080"
 	http.Handle("/", http.FileServer(http.Dir("./")))
 	http.Handle("/wsDemo", websocket.Handler(wsHandler))
-	log.Fatal(http.ListenAndServe(":80", nil))
+	log.Println("listen 8080")
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

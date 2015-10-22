@@ -81,10 +81,13 @@ func webRDPdesktop_resize(context *C.rdpContext) C.BOOL {
 //export webRDPdstblt
 func webRDPdstblt(context *C.rdpContext, dstblt *C.DSTBLT_ORDER) C.BOOL {
 	log.Println("webRDPdstblt")
-	t := (*chan string)(C.getWSChan(context))
+	t := (*chan RdpDrawInfo)(C.getWSChan(context))
 	log.Printf("t:%p", t)
-	s := fmt.Sprintf("01%04x%04x%04x%04x", dstblt.nLeftRect, dstblt.nTopRect, dstblt.nWidth, dstblt.nHeight)
-	*t <- s
+	info := RdpDrawInfo{}
+	s := fmt.Sprintf("%04x%04x%04x%04x", dstblt.nLeftRect, dstblt.nTopRect, dstblt.nWidth, dstblt.nHeight)
+	info.Type = "01"
+	info.Pos = s
+	*t <- info
 	return C.TRUE
 }
 
@@ -111,10 +114,11 @@ func webRDPopaquerect(context *C.rdpContext, opaque_rect *C.OPAQUE_RECT_ORDER) C
 	log.Println("webRDPopaquerect")
 	color := C.freerdp_color_convert_var(opaque_rect.color, 32, 32, convert2webContext(context).clrconv)
 	log.Printf("webRDPopaquerect:%x==>%x", opaque_rect.color, color)
-	t := (*chan string)(C.getWSChan(context))
+	t := (*chan RdpDrawInfo)(C.getWSChan(context))
 	log.Printf("t:%p", t)
-	s := fmt.Sprintf("02#%06x%04x%04x%04x%04x", opaque_rect.color, opaque_rect.nLeftRect, opaque_rect.nTopRect, opaque_rect.nWidth, opaque_rect.nHeight)
-	*t <- s
+	s := fmt.Sprintf("%04x%04x%04x%04x", opaque_rect.nLeftRect, opaque_rect.nTopRect, opaque_rect.nWidth, opaque_rect.nHeight)
+	info := RdpDrawInfo{"02", fmt.Sprintf("#%06x", opaque_rect.color), s}
+	*t <- info
 	return C.TRUE
 }
 
