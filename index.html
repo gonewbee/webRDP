@@ -27,7 +27,7 @@
     console.log("Disconnected!");
   }; 
   websocket.onmessage = function(evt) {
-    console.log('Retrieved data from server: ' + evt.data);
+    // console.log('Retrieved data from server: ' + evt.data);
     var info = JSON.parse(evt.data)
     switch(info.type) {
       case "01":
@@ -35,6 +35,9 @@
         break;
       case "02":
         fillRect(info.color, info.pos);
+        break;
+      case "04":
+        console.log("in bmp")
         break;
     }
   };

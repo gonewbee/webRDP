@@ -1,14 +1,5 @@
 package main
 
-/*
-#include <freerdp/graphics.h>
-#include "webrdp.h"
-static void *getWSChan(rdpContext* context) {
-	webContext* xfc = (webContext*) context;
-	return xfc->wsChan;
-}
-*/
-import "C"
 import (
 	"encoding/json"
 	"golang.org/x/net/websocket"
@@ -63,8 +54,9 @@ func wsHandler(ws *websocket.Conn) {
 	// c2 := make(chan string, 5) // 相当于消息队列中的最大消息数目
 	wsClosed := make(chan bool)
 
-	context := Rdp_new()
-	ct := *(*chan RdpDrawInfo)(C.getWSChan(context))
+	wschan := make(chan RdpDrawInfo)
+
+	context := Rdp_new(wschan)
 	setRdpInfo(context)
 	go Rdp_start(context)
 
@@ -84,15 +76,17 @@ forLoop:
 			// 根据坐标回复颜色值
 			// msg1 = "#" + strconv.FormatInt(int64(pos.X*10), 16) + strconv.FormatInt(int64(pos.Y*10), 16)
 			// websocket.Message.Send(ws, msg1)
-		case info := <-ct:
+		case info := <-wschan:
+			log.Println("select----------------------in")
 			s, err := json.Marshal(info)
 			if err != nil {
 				log.Println("Marshal info error!!!")
 			} else {
 				str := string(s)
-				log.Println("ct receive:" + str)
+				// log.Println("ct receive:" + str)
 				websocket.Message.Send(ws, str)
 			}
+			log.Println("select----------------------end")
 		case <-wsClosed:
 			log.Printf("wsClosed")
 			break forLoop

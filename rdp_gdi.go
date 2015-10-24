@@ -117,7 +117,10 @@ func webRDPopaquerect(context *C.rdpContext, opaque_rect *C.OPAQUE_RECT_ORDER) C
 	t := (*chan RdpDrawInfo)(C.getWSChan(context))
 	log.Printf("t:%p", t)
 	s := fmt.Sprintf("%04x%04x%04x%04x", opaque_rect.nLeftRect, opaque_rect.nTopRect, opaque_rect.nWidth, opaque_rect.nHeight)
-	info := RdpDrawInfo{"02", fmt.Sprintf("#%06x", opaque_rect.color), s}
+	info := RdpDrawInfo{}
+	info.Type = "02"
+	info.Color = fmt.Sprintf("#%06x", opaque_rect.color)
+	info.Pos = s
 	*t <- info
 	return C.TRUE
 }

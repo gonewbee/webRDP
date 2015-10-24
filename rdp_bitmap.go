@@ -22,7 +22,7 @@ import (
 func webRdpBitmapNew(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 	log.Println("webRdpBitmapNew")
 	if bitmap.data != nil {
-		log.Println("try to use")
+		log.Printf("l:%d t:%d r:%d b:%d w:%d h:%d", bitmap.left, bitmap.top, bitmap.right, bitmap.bottom, bitmap.width, bitmap.height)
 	}
 	return C.TRUE
 }
@@ -36,6 +36,7 @@ func webRdpBitmapFree(context *C.rdpContext, bitmap *C.rdpBitmap) {
 //export webRdpBitmapPaint
 func webRdpBitmapPaint(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 	log.Println("webRdpBitmapPaint")
+	log.Printf("webRdpBitmapPaint length:%d", bitmap.length)
 	return C.TRUE
 }
 

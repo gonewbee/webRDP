@@ -1,10 +1,10 @@
 package main
 
-// #cgo CFLAGS: -I/home/zsy/Workspace/code/FreeRDP/include
-// #cgo CFLAGS: -I/home/zsy/Workspace/code/FreeRDP/winpr/include
-// #cgo LDFLAGS: -L/home/zsy/Workspace/code/FreeRDP/libfreerdp -lfreerdp
-// #cgo LDFLAGS: -L/home/zsy/Workspace/code/FreeRDP/client/common -lfreerdp-client
-// #cgo LDFLAGS: -L/home/zsy/Workspace/code/FreeRDP/winpr/libwinpr -lwinpr
+// #cgo CFLAGS: -I/workspace/FreeRDP/include
+// #cgo CFLAGS: -I/workspace/FreeRDP/winpr/include
+// #cgo LDFLAGS: -L/workspace/FreeRDP/libfreerdp -lfreerdp
+// #cgo LDFLAGS: -L/workspace/FreeRDP/client/common -lfreerdp-client
+// #cgo LDFLAGS: -L/workspace/FreeRDP/winpr/libwinpr -lwinpr
 // #include "freerdp/freerdp.h"
 // #include "freerdp/client.h"
 /*
@@ -46,15 +46,19 @@ static int RdpClientEntry(RDP_CLIENT_ENTRY_POINTS* pEntryPoints) {
 	return 0;
 }
 
-static void setFuncInClient(freerdp *instance, rdpContext* context, void *wsChan) {
+static void setFuncInClient(freerdp *instance, rdpContext* context) {
 	webContext* xfc = (webContext*) instance->context;
-	xfc->wsChan = wsChan;
 	xfc->clrconv = freerdp_clrconv_new(CLRCONV_ALPHA|CLRCONV_INVERT);
 	context->channels = freerdp_channels_new();
 	instance->PreConnect = web_pre_connect;
 	instance->PostConnect = web_post_connect;
 	instance->Authenticate = web_authenticate;
 	instance->VerifyCertificate = web_verify_certificate;
+}
+
+static void setContextChan(freerdp *instance, void *wsChan) {
+	webContext* xfc = (webContext*) instance->context;
+	xfc->wsChan = wsChan;
 }
 
 static void web_pre_connect_set(freerdp *instance) {
@@ -233,8 +237,7 @@ func webfreerdp_client_global_uninit() {
 //export webfreerdp_client_new
 func webfreerdp_client_new(instance *C.freerdp, context *C.rdpContext) C.BOOL {
 	log.Println("webfreerdp_client_new")
-	wschan := make(chan RdpDrawInfo)
-	C.setFuncInClient(instance, context, unsafe.Pointer(&wschan))
+	C.setFuncInClient(instance, context)
 	return C.TRUE
 }
 
@@ -261,15 +264,22 @@ func webfreerdp_client_stop(context *C.rdpContext) C.int {
 func setRdpInfo(context *C.rdpContext) {
 	settings := context.instance.settings
 	log.Printf("w:%d h:%d", settings.DesktopWidth, settings.DesktopHeight)
-	settings.ServerHostname = C.CString("192.168.102.12")
-	settings.Username = C.CString("2@masscloudsil.com")
-	settings.Password = C.CString("123456")
+	settings.ServerHostname = C.CString("192.168.65.130")
+	settings.Username = C.CString("zsy")
+	settings.Password = C.CString("745123")
 	// defer C.free(unsafe.Pointer(settings.ServerHostname))
 	// defer C.free(unsafe.Pointer(settings.Username))
 	// defer C.free(unsafe.Pointer(settings.Password))
+
+	// Standard RDP
+	// settings.RdpSecurity = C.TRUE
+	// settings.TlsSecurity = C.FALSE
+	// settings.NlaSecurity = C.FALSE
+	// settings.ExtSecurity = C.FALSE
+	// settings.UseRdpSecurityLayer = C.TRUE
 }
 
-func Rdp_new() *C.rdpContext {
+func Rdp_new(wschan chan RdpDrawInfo) *C.rdpContext {
 	var clientEntryPoints C.RDP_CLIENT_ENTRY_POINTS
 	clientEntryPoints.Size = C.DWORD(unsafe.Sizeof(clientEntryPoints))
 	clientEntryPoints.Version = C.RDP_CLIENT_INTERFACE_VERSION
@@ -277,10 +287,15 @@ func Rdp_new() *C.rdpContext {
 	C.RdpClientEntry(&clientEntryPoints)
 	log.Printf("size:%d version:%d", clientEntryPoints.Size, clientEntryPoints.Version)
 	context := C.freerdp_client_context_new(&clientEntryPoints)
+	C.setContextChan(context.instance, unsafe.Pointer(&wschan))
 	return context
 }
 
 func Rdp_start(context *C.rdpContext) {
 	log.Println(C.GoString(context.instance.settings.ServerHostname))
 	C.freerdp_client_start(context)
+
+	log.Println("Rdp_start end!")
+	C.freerdp_client_stop(context)
+	C.freerdp_client_context_free(context)
 }
