@@ -89,6 +89,7 @@ forLoop:
 			log.Println("select----------------------end")
 		case <-wsClosed:
 			log.Printf("wsClosed")
+			Rdp_stop(context)
 			break forLoop
 		}
 	}

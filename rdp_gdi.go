@@ -45,26 +45,12 @@ static void web_gdi_register_update_callbacks(rdpUpdate* update) {
 	primary->EllipseSC = NULL;
 	primary->EllipseCB = NULL;
 }
-
-static webContext* convert2webContextC(rdpContext* context) {
-	webContext* xfc = (webContext*) context;
-	return xfc;
-}
-
-static void *getWSChan(rdpContext* context) {
-	webContext* xfc = (webContext*) context;
-	return xfc->wsChan;
-}
 */
 import "C"
 import (
 	"fmt"
 	"log"
 )
-
-func convert2webContext(context *C.rdpContext) *C.webContext {
-	return C.convert2webContextC(context)
-}
 
 //export webRDPend_paint
 func webRDPend_paint(context *C.rdpContext) C.BOOL {
@@ -81,13 +67,11 @@ func webRDPdesktop_resize(context *C.rdpContext) C.BOOL {
 //export webRDPdstblt
 func webRDPdstblt(context *C.rdpContext, dstblt *C.DSTBLT_ORDER) C.BOOL {
 	log.Println("webRDPdstblt")
-	t := (*chan RdpDrawInfo)(C.getWSChan(context))
-	log.Printf("t:%p", t)
 	info := RdpDrawInfo{}
 	s := fmt.Sprintf("%04x%04x%04x%04x", dstblt.nLeftRect, dstblt.nTopRect, dstblt.nWidth, dstblt.nHeight)
 	info.Type = "01"
 	info.Pos = s
-	*t <- info
+	writeByChen(context, info)
 	return C.TRUE
 }
 
@@ -114,14 +98,12 @@ func webRDPopaquerect(context *C.rdpContext, opaque_rect *C.OPAQUE_RECT_ORDER) C
 	log.Println("webRDPopaquerect")
 	color := C.freerdp_color_convert_var(opaque_rect.color, 32, 32, convert2webContext(context).clrconv)
 	log.Printf("webRDPopaquerect:%x==>%x", opaque_rect.color, color)
-	t := (*chan RdpDrawInfo)(C.getWSChan(context))
-	log.Printf("t:%p", t)
 	s := fmt.Sprintf("%04x%04x%04x%04x", opaque_rect.nLeftRect, opaque_rect.nTopRect, opaque_rect.nWidth, opaque_rect.nHeight)
 	info := RdpDrawInfo{}
 	info.Type = "02"
 	info.Color = fmt.Sprintf("#%06x", opaque_rect.color)
 	info.Pos = s
-	*t <- info
+	writeByChen(context, info)
 	return C.TRUE
 }
 

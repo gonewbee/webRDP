@@ -147,11 +147,13 @@ static void web_client_func(freerdp* instance) {
 	DWORD waitStatus;
 	HANDLE handles[64];
 	rdpContext* context;
+	webContext* xfc;
 
 	context = instance->context;
 	status = freerdp_connect(instance);
 
-	while (!freerdp_shall_disconnect(instance)) {
+	xfc = (webContext*) instance->context;
+	while (!xfc->disconnect && !freerdp_shall_disconnect(instance)) {
 		nCount = 0;
 		DWORD tmp = freerdp_get_event_handles(context, &handles[nCount], 64 - nCount);
 		if (tmp == 0)
@@ -298,4 +300,9 @@ func Rdp_start(context *C.rdpContext) {
 	log.Println("Rdp_start end!")
 	C.freerdp_client_stop(context)
 	C.freerdp_client_context_free(context)
+}
+
+func Rdp_stop(context *C.rdpContext) {
+	xfc := convert2webContext(context)
+	xfc.disconnect = C.TRUE
 }

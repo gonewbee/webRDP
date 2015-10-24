@@ -9,6 +9,7 @@ typedef struct {
 	HCLRCONV clrconv;
 	void *wsChan;
 	UINT32 palette[256];
+	BOOL disconnect;
 } webContext;
 
 typedef struct web_rdp_bitmap {
