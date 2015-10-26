@@ -1,13 +1,8 @@
 package main
 
-// #cgo CFLAGS: -I/workspace/FreeRDP/include
-// #cgo CFLAGS: -I/workspace/FreeRDP/winpr/include
-// #cgo LDFLAGS: -L/workspace/FreeRDP/libfreerdp -lfreerdp
-// #cgo LDFLAGS: -L/workspace/FreeRDP/client/common -lfreerdp-client
-// #cgo LDFLAGS: -L/workspace/FreeRDP/winpr/libwinpr -lwinpr
-// #include "freerdp/freerdp.h"
-// #include "freerdp/client.h"
 /*
+#include "freerdp/freerdp.h"
+#include "freerdp/client.h"
 #include "webrdp.h"
 #include "freerdp/cache/glyph.h"
 #include "freerdp/channels/channels.h"
