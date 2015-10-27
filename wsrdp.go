@@ -9,9 +9,13 @@ import (
 	"time"
 )
 
-type mousePos struct {
-	X int `json:"x"`
-	Y int `json:"y"`
+type wsReadInfo struct {
+	Type   string `json:"type"`
+	Ip     string `json:"ip"`
+	User   string `json:"user"`
+	Passwd string `json:"passwd"`
+	X      int    `json:"x"`
+	Y      int    `json:"y"`
 }
 
 type RdpDrawInfo struct {
@@ -55,10 +59,7 @@ func wsHandler(ws *websocket.Conn) {
 	wsClosed := make(chan bool)
 
 	wschan := make(chan RdpDrawInfo)
-
 	context := Rdp_new(wschan)
-	setRdpInfo(context)
-	go Rdp_start(context)
 
 	go wsWorker(ws, c1, wsClosed)
 
@@ -68,13 +69,18 @@ forLoop:
 		select {
 		case msg1 := <-c1:
 			log.Println("c1 receive:" + msg1)
-			var pos mousePos
-			if err := json.Unmarshal([]byte(msg1), &pos); err != nil {
+			var info wsReadInfo
+			if err := json.Unmarshal([]byte(msg1), &info); err != nil {
 				log.Panic("Unmarshal error!")
 				break
 			}
+			switch info.Type {
+			case "login":
+				setRdpInfo(context, info)
+				go Rdp_start(context)
+			}
 			// 根据坐标回复颜色值
-			// msg1 = "#" + strconv.FormatInt(int64(pos.X*10), 16) + strconv.FormatInt(int64(pos.Y*10), 16)
+			// msg1 = "#" + strconv.FormatInt(int64(info.X*10), 16) + strconv.FormatInt(int64(info.Y*10), 16)
 			// websocket.Message.Send(ws, msg1)
 		case info := <-wschan:
 			log.Println("select----------------------in")

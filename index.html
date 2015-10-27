@@ -4,9 +4,22 @@
   <meta charset="UTF-8">
   <title>WebSocket示例</title>
   <style type="text/css">
+  .login {
+    position: absolute;
+    left: 200px;
+    top: 50px;
+    border: solid 1px;
+    text-align: center;
+  }
+  #loginForm label {
+    display: block;
+  }
   .main {
     margin: 0 auto;
     text-align: center;
+  }
+  .hide {
+    display: none;
   }
   </style>
 </head>
@@ -15,7 +28,15 @@
   <h3>画布</h3>
   <canvas id="content" width="1025px" height="769px"></canvas>
 </div>
-
+<div class="login">
+<form id="loginForm">
+  <h2>login dialog</h2>
+  <label>ip:<input type="text" name="ip" placeholder="server ip"/></label>
+  <label>user:<input type="text" name="user" placeholder="username"/></label>
+  <label>passwd:<input type="password" name="passwd" placeholder="password"/></label>
+  <input type="submit" value="ok"/>
+</form>
+</div>
 <script type="text/javascript">
   var wsServer = "ws://"+window.location.host+"/wsDemo";
   var websocket = new WebSocket(wsServer);
@@ -44,6 +65,20 @@
   websocket.onerror = function (evt) { 
     console.log('Error occured: ' + evt.data); 
   };
+
+  var loginform = document.querySelector("#loginForm");
+  loginform.addEventListener("submit", function(evt) {
+    evt.preventDefault();
+    console.log("onsubmit");
+    var data = {};
+    data.type = "login";
+    data.ip = this["ip"].value;
+    data.user = this["user"].value;
+    data.passwd = this["passwd"].value;
+    console.log(data);
+    websocket.send(JSON.stringify(data));
+    document.querySelector(".login").classList.add("hide");
+  }, false);
 
   var canvas=document.getElementById('content');
   canvas.addEventListener("click", function (evt) {

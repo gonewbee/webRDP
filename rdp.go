@@ -258,12 +258,12 @@ func webfreerdp_client_stop(context *C.rdpContext) C.int {
 	return 0
 }
 
-func setRdpInfo(context *C.rdpContext) {
+func setRdpInfo(context *C.rdpContext, info wsReadInfo) {
 	settings := context.instance.settings
 	log.Printf("w:%d h:%d", settings.DesktopWidth, settings.DesktopHeight)
-	settings.ServerHostname = C.CString("192.168.65.130")
-	settings.Username = C.CString("zsy")
-	settings.Password = C.CString("745123")
+	settings.ServerHostname = C.CString(info.Ip)
+	settings.Username = C.CString(info.User)
+	settings.Password = C.CString(info.Passwd)
 	// defer C.free(unsafe.Pointer(settings.ServerHostname))
 	// defer C.free(unsafe.Pointer(settings.Username))
 	// defer C.free(unsafe.Pointer(settings.Password))
