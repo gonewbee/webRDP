@@ -5,11 +5,13 @@
   <title>WebSocket示例</title>
   <style type="text/css">
   .login {
-    position: absolute;
-    left: 200px;
-    top: 50px;
-    border: solid 1px;
+    position: fixed;
+    margin: 0 auto;
+    left: 0px;right: 0px;
+    top: 50px;width: 400px;
+    border: solid 1px #cccccc;
     text-align: center;
+    background-color: #cccccc;
   }
   #loginForm label {
     display: block;
@@ -31,9 +33,9 @@
 <div class="login">
 <form id="loginForm">
   <h2>login dialog</h2>
-  <label>ip:<input type="text" name="ip" placeholder="server ip"/></label>
-  <label>user:<input type="text" name="user" placeholder="username"/></label>
-  <label>passwd:<input type="password" name="passwd" placeholder="password"/></label>
+  <label>ip:<input type="text" name="ip" required="required" placeholder="server ip"/></label>
+  <label>user:<input type="text" name="user" required="required" placeholder="username"/></label>
+  <label>passwd:<input type="password" name="passwd" required="required" placeholder="password"/></label>
   <input type="submit" value="ok"/>
 </form>
 </div>
