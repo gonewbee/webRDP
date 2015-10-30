@@ -7,7 +7,7 @@
 typedef struct {
 	rdpContext context;
 	HCLRCONV clrconv;
-	void *wsChan;
+	INT64 chanid;
 	UINT32 palette[256];
 	BOOL disconnect;
 } webContext;

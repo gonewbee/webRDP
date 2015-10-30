@@ -8,9 +8,9 @@ static webContext* convert2webContextC(rdpContext* context) {
 	return xfc;
 }
 
-static void *getWSChan(rdpContext* context) {
+static INT64 getWSChan(rdpContext* context) {
 	webContext* xfc = (webContext*) context;
-	return xfc->wsChan;
+	return xfc->chanid;
 }
 */
 import "C"
@@ -24,11 +24,13 @@ func convert2webContext(context *C.rdpContext) *C.webContext {
 }
 
 func writeByChen(context *C.rdpContext, info RdpDrawInfo) {
-	t := *(*chan RdpDrawInfo)(C.getWSChan(context))
+	log.Println("writeByChen try to send---------------")
+	wschan := chans[int64(C.getWSChan(context))]
+	log.Println(wschan)
 	select {
-	case t <- info:
+	case wschan <- info:
 		log.Println("send ok")
-	case <-time.After(time.Second * 5):
+	case <-time.After(time.Second * 3):
 		log.Println("send time out")
 		xfc := convert2webContext(context)
 		xfc.disconnect = C.TRUE

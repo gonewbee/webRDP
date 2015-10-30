@@ -51,9 +51,9 @@ static void setFuncInClient(freerdp *instance, rdpContext* context) {
 	instance->VerifyCertificate = web_verify_certificate;
 }
 
-static void setContextChan(freerdp *instance, void *wsChan) {
+static void setContextChan(freerdp *instance, INT64 chanid) {
 	webContext* xfc = (webContext*) instance->context;
-	xfc->wsChan = wsChan;
+	xfc->chanid = chanid;
 }
 
 static void web_pre_connect_set(freerdp *instance) {
@@ -276,7 +276,7 @@ func setRdpInfo(context *C.rdpContext, info wsReadInfo) {
 	// settings.UseRdpSecurityLayer = C.TRUE
 }
 
-func Rdp_new(wschan chan RdpDrawInfo) *C.rdpContext {
+func Rdp_new(chanId int64) *C.rdpContext {
 	var clientEntryPoints C.RDP_CLIENT_ENTRY_POINTS
 	clientEntryPoints.Size = C.DWORD(unsafe.Sizeof(clientEntryPoints))
 	clientEntryPoints.Version = C.RDP_CLIENT_INTERFACE_VERSION
@@ -284,7 +284,7 @@ func Rdp_new(wschan chan RdpDrawInfo) *C.rdpContext {
 	C.RdpClientEntry(&clientEntryPoints)
 	log.Printf("size:%d version:%d", clientEntryPoints.Size, clientEntryPoints.Version)
 	context := C.freerdp_client_context_new(&clientEntryPoints)
-	C.setContextChan(context.instance, unsafe.Pointer(&wschan))
+	C.setContextChan(context.instance, C.INT64(chanId))
 	return context
 }
 
@@ -298,6 +298,7 @@ func Rdp_start(context *C.rdpContext) {
 }
 
 func Rdp_stop(context *C.rdpContext) {
+	log.Println("Rdp_stop set disconnect----------")
 	xfc := convert2webContext(context)
 	xfc.disconnect = C.TRUE
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"golang.org/x/net/websocket"
 	"log"
 	"net/http"
@@ -23,6 +24,8 @@ type RdpDrawInfo struct {
 	Color string `json:"color,omitempty"`
 	Pos   string `json:"pos"`
 }
+
+var chans = make(map[int64]chan RdpDrawInfo)
 
 func wsWorker(ws *websocket.Conn, msg chan<- string, wsClosed chan<- bool) {
 	var message string
@@ -59,7 +62,13 @@ func wsHandler(ws *websocket.Conn) {
 	wsClosed := make(chan bool)
 
 	wschan := make(chan RdpDrawInfo)
-	context := Rdp_new(wschan)
+	log.Println(wschan)
+	log.Printf("wschan:%v", wschan)
+	id, err := strconv.ParseInt(fmt.Sprintf("%v", wschan)[2:], 16, 64)
+	if err != nil {
+		id = time.Now().UnixNano()
+	}
+	log.Printf("id:0x%x", id)
 
 	go wsWorker(ws, c1, wsClosed)
 
@@ -76,8 +85,12 @@ forLoop:
 			}
 			switch info.Type {
 			case "login":
+				chans[id] = wschan
+				defer delete(chans, id)
+				context := Rdp_new(id)
 				setRdpInfo(context, info)
 				go Rdp_start(context)
+				defer Rdp_stop(context)
 			}
 			// 根据坐标回复颜色值
 			// msg1 = "#" + strconv.FormatInt(int64(info.X*10), 16) + strconv.FormatInt(int64(info.Y*10), 16)
@@ -95,7 +108,6 @@ forLoop:
 			log.Println("select----------------------end")
 		case <-wsClosed:
 			log.Printf("wsClosed")
-			Rdp_stop(context)
 			break forLoop
 		}
 	}

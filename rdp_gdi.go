@@ -54,7 +54,7 @@ import (
 
 //export webRDPend_paint
 func webRDPend_paint(context *C.rdpContext) C.BOOL {
-	log.Println("webRDPend_paint")
+	// log.Println("webRDPend_paint")
 	return C.TRUE
 }
 
