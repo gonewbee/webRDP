@@ -20,12 +20,17 @@ type wsReadInfo struct {
 }
 
 type RdpDrawInfo struct {
-	Type  string `json:"type"`
-	Color string `json:"color,omitempty"`
-	Pos   string `json:"pos"`
+	Type   byte   `json:"type"`
+	Color  uint32 `json:"color,omitempty"`
+	Left   uint16 `json:"left"`
+	Top    uint16 `json:"top"`
+	Width  uint16 `json:"width"`
+	Height uint16 `json:"height"`
+	Bmp    []byte `json:"bmp,omitempty"`
+	BmpLen int    `json:"bmplen,omitempty"`
 }
 
-var chans = make(map[int64]chan RdpDrawInfo)
+var chans = make(map[int64]chan []byte)
 
 func wsWorker(ws *websocket.Conn, msg chan<- string, wsClosed chan<- bool) {
 	var message string
@@ -61,7 +66,7 @@ func wsHandler(ws *websocket.Conn) {
 	// c2 := make(chan string, 5) // 相当于消息队列中的最大消息数目
 	wsClosed := make(chan bool)
 
-	wschan := make(chan RdpDrawInfo)
+	wschan := make(chan []byte)
 	log.Println(wschan)
 	log.Printf("wschan:%v", wschan)
 	id, err := strconv.ParseInt(fmt.Sprintf("%v", wschan)[2:], 16, 64)
@@ -96,16 +101,7 @@ forLoop:
 			// msg1 = "#" + strconv.FormatInt(int64(info.X*10), 16) + strconv.FormatInt(int64(info.Y*10), 16)
 			// websocket.Message.Send(ws, msg1)
 		case info := <-wschan:
-			log.Println("select----------------------in")
-			s, err := json.Marshal(info)
-			if err != nil {
-				log.Println("Marshal info error!!!")
-			} else {
-				str := string(s)
-				// log.Println("ct receive:" + str)
-				websocket.Message.Send(ws, str)
-			}
-			log.Println("select----------------------end")
+			websocket.Message.Send(ws, info)
 		case <-wsClosed:
 			log.Printf("wsClosed")
 			break forLoop

@@ -15,6 +15,7 @@ static INT64 getWSChan(rdpContext* context) {
 */
 import "C"
 import (
+	"encoding/binary"
 	"log"
 	"time"
 )
@@ -27,8 +28,16 @@ func writeByChen(context *C.rdpContext, info RdpDrawInfo) {
 	log.Println("writeByChen try to send---------------")
 	wschan := chans[int64(C.getWSChan(context))]
 	log.Println(wschan)
+	data := make([]byte, 16)
+	data[0] = info.Type
+	binary.BigEndian.PutUint16(data[1:], info.Left)
+	binary.BigEndian.PutUint16(data[3:], info.Top)
+	binary.BigEndian.PutUint16(data[5:], info.Width)
+	binary.BigEndian.PutUint16(data[7:], info.Height)
+	binary.BigEndian.PutUint32(data[9:], info.Color)
+	log.Printf("%x %x %x %x", data[9], data[10], data[11], data[12])
 	select {
-	case wschan <- info:
+	case wschan <- data:
 		log.Println("send ok")
 	case <-time.After(time.Second * 3):
 		log.Println("send time out")

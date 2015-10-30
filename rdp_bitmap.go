@@ -3,6 +3,7 @@ package main
 /*
 #include <freerdp/graphics.h>
 #include "webrdp.h"
+#include "freerdp/gdi/gdi.h"
 static int getsizeof(BYTE* p) {
 	return sizeof(p);
 }
@@ -20,23 +21,32 @@ import (
 
 //export webRdpBitmapNew
 func webRdpBitmapNew(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
-	log.Println("webRdpBitmapNew")
-	if bitmap.data != nil {
-		log.Printf("l:%d t:%d r:%d b:%d w:%d h:%d", bitmap.left, bitmap.top, bitmap.right, bitmap.bottom, bitmap.width, bitmap.height)
-	}
+	// log.Println("webRdpBitmapNew")
+	// if bitmap.data != nil {
+	// 	log.Printf("l:%d t:%d r:%d b:%d w:%d h:%d", bitmap.left, bitmap.top, bitmap.right, bitmap.bottom, bitmap.width, bitmap.height)
+	// }
 	return C.TRUE
 }
 
 //export webRdpBitmapFree
 func webRdpBitmapFree(context *C.rdpContext, bitmap *C.rdpBitmap) {
-	log.Println("webRdpBitmapFree")
-	C._aligned_free(unsafe.Pointer(bitmap.data))
+	// log.Println("webRdpBitmapFree")
+	// C._aligned_free(unsafe.Pointer(bitmap.data))
 }
 
 //export webRdpBitmapPaint
 func webRdpBitmapPaint(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 	log.Println("webRdpBitmapPaint")
 	log.Printf("webRdpBitmapPaint length:%d", bitmap.length)
+	if bitmap.data != nil {
+		bs := C.GoBytes(unsafe.Pointer(bitmap.data), C.int(bitmap.length))
+		log.Printf("%x %x %x %x %x %x %x %x", bs[0], bs[1], bs[2], bs[3], bs[4], bs[5], bs[6], bs[7])
+		info := RdpDrawInfo{}
+		info.Type = 5
+		info.Bmp = bs
+		info.BmpLen = int(bitmap.length)
+		writeByChen(context, info)
+	}
 	return C.TRUE
 }
 
@@ -44,9 +54,11 @@ func webRdpBitmapPaint(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 func webRdpBitmapDecompress(context *C.rdpContext, bitmap *C.rdpBitmap, data *C.BYTE,
 	width C.int, height C.int, bpp C.int, length C.int,
 	compressed C.BOOL, codecId C.int) C.BOOL {
-	log.Println("webRdpBitmapDecompress")
 	log.Printf("compressed:%d bpp:%d", compressed, bpp)
 	size := width * height * 4
+	if bitmap.data != nil {
+		C._aligned_free(unsafe.Pointer(bitmap.data))
+	}
 	bitmap.data = (*C.BYTE)(C._aligned_malloc(C.size_t(size), 16))
 	if compressed != C.FALSE {
 		if bpp < 32 {

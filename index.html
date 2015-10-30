@@ -50,18 +50,31 @@
     console.log("Disconnected!");
   }; 
   websocket.onmessage = function(evt) {
-    // console.log('Retrieved data from server: ' + evt.data);
-    var info = JSON.parse(evt.data)
-    switch(info.type) {
-      case "01":
-        drawRect(info.pos);
-        break;
-      case "02":
-        fillRect(info.color, info.pos);
-        break;
-      case "04":
-        console.log("in bmp")
-        break;
+    if (evt.data instanceof ArrayBuffer) {
+      var data = new Uint8Array(evt.data);
+      var type = data[0];
+      var left = (data[1]<<8) + data[2];
+      var top = (data[3]<<8) + data[4];
+      var width = (data[5]<<8) + data[6];
+      var height = (data[7]<<8) + data[8];
+      // data[9:13] argb
+      var color = "rgb("+data[10] + "," + data[11] + "," + data[12] +")";
+      switch (type) {
+        case 1:
+          console.log("drawRect");
+          drawRect(left, top, width, height);
+          break;
+        case 2:
+          console.log("fillRect");
+          fillRect(color, left, top, width, height);
+          break;
+        case 5:
+          console.log("bitmap");
+          break;
+      }
+    } else if (evt.data instanceof String) {
+      var info = JSON.parse(evt.data);
+      console.log(info.type);
     }
   };
   websocket.onerror = function (evt) { 
@@ -109,22 +122,15 @@
     return rgba;
   }
 
-  function fillRect(color, data) {
+  function fillRect(color, x, y, w, h) {
     var ctx=canvas.getContext('2d');
-    var x = parseInt(data.substring(0,4),16);
-    var y = parseInt(data.substring(4,8),16);
-    var w = parseInt(data.substring(8,12),16);
-    var h = parseInt(data.substring(12),16);
     ctx.fillStyle = color;
     ctx.fillRect(x+0.5,y+0.5,w,h);
   }
 
-  function drawRect(data) {
+
+  function drawRect(x, y, w, h) {
     var ctx=canvas.getContext('2d');
-    var x = parseInt(data.substring(0,4),16);
-    var y = parseInt(data.substring(4,8),16);
-    var w = parseInt(data.substring(8,12),16);
-    var h = parseInt(data.substring(12),16);
     ctx.strokeRect(x+0.5,y+0.5,w,h);
   }
 

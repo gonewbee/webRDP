@@ -48,7 +48,6 @@ static void web_gdi_register_update_callbacks(rdpUpdate* update) {
 */
 import "C"
 import (
-	"fmt"
 	"log"
 )
 
@@ -68,9 +67,11 @@ func webRDPdesktop_resize(context *C.rdpContext) C.BOOL {
 func webRDPdstblt(context *C.rdpContext, dstblt *C.DSTBLT_ORDER) C.BOOL {
 	log.Println("webRDPdstblt")
 	info := RdpDrawInfo{}
-	s := fmt.Sprintf("%04x%04x%04x%04x", dstblt.nLeftRect, dstblt.nTopRect, dstblt.nWidth, dstblt.nHeight)
-	info.Type = "01"
-	info.Pos = s
+	info.Type = 1
+	info.Left = uint16(dstblt.nLeftRect)
+	info.Top = uint16(dstblt.nTopRect)
+	info.Width = uint16(dstblt.nWidth)
+	info.Height = uint16(dstblt.nHeight)
 	writeByChen(context, info)
 	return C.TRUE
 }
@@ -98,11 +99,13 @@ func webRDPopaquerect(context *C.rdpContext, opaque_rect *C.OPAQUE_RECT_ORDER) C
 	log.Println("webRDPopaquerect")
 	color := C.freerdp_color_convert_var(opaque_rect.color, 32, 32, convert2webContext(context).clrconv)
 	log.Printf("webRDPopaquerect:%x==>%x", opaque_rect.color, color)
-	s := fmt.Sprintf("%04x%04x%04x%04x", opaque_rect.nLeftRect, opaque_rect.nTopRect, opaque_rect.nWidth, opaque_rect.nHeight)
 	info := RdpDrawInfo{}
-	info.Type = "02"
-	info.Color = fmt.Sprintf("#%06x", opaque_rect.color)
-	info.Pos = s
+	info.Type = 2
+	info.Color = uint32(color)
+	info.Left = uint16(opaque_rect.nLeftRect)
+	info.Top = uint16(opaque_rect.nTopRect)
+	info.Width = uint16(opaque_rect.nWidth)
+	info.Height = uint16(opaque_rect.nHeight)
 	writeByChen(context, info)
 	return C.TRUE
 }
