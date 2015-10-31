@@ -131,10 +131,10 @@
     var data = imageData.data;
     console.log(bmp[0]+";"+bmp[1]+";"+bmp[2]+";"+bmp[3]);
     for (var i = 0; i < data.length; i+=4) {
-      data[i] = bmp[i+1];
-      data[i+1] = bmp[i+2];
-      data[i+2] = bmp[i+3];
-      data[i+3] = bmp[i];
+      data[i] = bmp[i+2];   // R
+      data[i+1] = bmp[i+1]; // G
+      data[i+2] = bmp[i];   // B
+      data[i+3] = 255; //bmp[i+3]; // A
     }
     ctx.putImageData(imageData, x, y);
   }
