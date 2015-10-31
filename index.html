@@ -59,6 +59,7 @@
       var height = (data[7]<<8) + data[8];
       // data[9:13] argb
       var color = "rgb("+data[10] + "," + data[11] + "," + data[12] +")";
+      console.log(left + ";" + top + ";" + width + ";" + height);
       switch (type) {
         case 1:
           console.log("drawRect");
@@ -69,7 +70,9 @@
           fillRect(color, left, top, width, height);
           break;
         case 5:
-          console.log("bitmap");
+          var bmpLen = (data[13]<<24)+(data[14]<<16)+(data[15]<<8)+data[16]
+          console.log("bitmap len:" + bmpLen);
+          drawImage(left, top, width, height, data.slice(17))
           break;
       }
     } else if (evt.data instanceof String) {
@@ -120,6 +123,20 @@
     var rgba = "rgba("+r+","+g+","+b+"," + a + ")";
     console.log(rgba);
     return rgba;
+  }
+
+  function drawImage(x, y, w, h, bmp) {
+    var ctx=canvas.getContext('2d');
+    var imageData = ctx.getImageData(x, y, w, h);
+    var data = imageData.data;
+    console.log(bmp[0]+";"+bmp[1]+";"+bmp[2]+";"+bmp[3]);
+    for (var i = 0; i < data.length; i+=4) {
+      data[i] = bmp[i+1];
+      data[i+1] = bmp[i+2];
+      data[i+2] = bmp[i+3];
+      data[i+3] = bmp[i];
+    }
+    ctx.putImageData(imageData, x, y);
   }
 
   function fillRect(color, x, y, w, h) {

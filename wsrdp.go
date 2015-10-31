@@ -27,7 +27,7 @@ type RdpDrawInfo struct {
 	Width  uint16 `json:"width"`
 	Height uint16 `json:"height"`
 	Bmp    []byte `json:"bmp,omitempty"`
-	BmpLen int    `json:"bmplen,omitempty"`
+	BmpLen uint32 `json:"bmplen,omitempty"`
 }
 
 var chans = make(map[int64]chan []byte)
@@ -112,7 +112,7 @@ forLoop:
 
 func main() {
 	port := "8080"
-	http.Handle("/", http.FileServer(http.Dir("./")))
+	http.Handle("/", http.FileServer(http.Dir("/workspace/webRDP/")))
 	http.Handle("/wsDemo", websocket.Handler(wsHandler))
 	log.Println("listen 8080")
 	log.Fatal(http.ListenAndServe(":"+port, nil))

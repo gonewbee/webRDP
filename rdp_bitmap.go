@@ -43,8 +43,12 @@ func webRdpBitmapPaint(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 		log.Printf("%x %x %x %x %x %x %x %x", bs[0], bs[1], bs[2], bs[3], bs[4], bs[5], bs[6], bs[7])
 		info := RdpDrawInfo{}
 		info.Type = 5
+		info.Left = uint16(bitmap.left)
+		info.Top = uint16(bitmap.top)
+		info.Width = uint16(bitmap.width)
+		info.Height = uint16(bitmap.height)
 		info.Bmp = bs
-		info.BmpLen = int(bitmap.length)
+		info.BmpLen = uint32(bitmap.length)
 		writeByChen(context, info)
 	}
 	return C.TRUE
