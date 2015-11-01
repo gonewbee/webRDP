@@ -17,12 +17,34 @@ import (
 func ProcessRDPEvent(instance *C.freerdp, info wsReadInfo) {
 	switch info.Type {
 	case "btnPre":
-		flags := C.PTR_FLAGS_DOWN | C.PTR_FLAGS_BUTTON1
+		var flags C.UINT16
+		switch info.Button {
+		case 0:
+			// left
+			flags = C.PTR_FLAGS_DOWN | C.PTR_FLAGS_BUTTON1
+		case 1:
+			// middle
+			flags = C.PTR_FLAGS_DOWN | C.PTR_FLAGS_BUTTON3
+		case 2:
+			// right
+			flags = C.PTR_FLAGS_DOWN | C.PTR_FLAGS_BUTTON2
+		}
 		log.Printf("ProcessRDPEvent x:%d y:%d", info.X, info.Y)
-		C.webrdp_button_press(instance, C.UINT16(flags), C.int(info.X), C.int(info.Y))
+		C.webrdp_button_press(instance, flags, C.int(info.X), C.int(info.Y))
 	case "btnRel":
-		flags := C.PTR_FLAGS_BUTTON1
+		var flags C.UINT16
+		switch info.Button {
+		case 0:
+			// left
+			flags = C.PTR_FLAGS_BUTTON1
+		case 1:
+			// middle
+			flags = C.PTR_FLAGS_BUTTON3
+		case 2:
+			// right
+			flags = C.PTR_FLAGS_BUTTON2
+		}
 		log.Printf("ProcessRDPEvent x:%d y:%d", info.X, info.Y)
-		C.webrdp_button_press(instance, C.UINT16(flags), C.int(info.X), C.int(info.Y))
+		C.webrdp_button_press(instance, flags, C.int(info.X), C.int(info.Y))
 	}
 }

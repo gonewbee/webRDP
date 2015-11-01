@@ -17,6 +17,7 @@ type wsReadInfo struct {
 	Passwd string `json:"passwd"`
 	X      int    `json:"x"`
 	Y      int    `json:"y"`
+	Button int    `json:"button"`
 }
 
 type RdpDrawInfo struct {

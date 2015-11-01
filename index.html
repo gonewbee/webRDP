@@ -113,13 +113,20 @@
     console.log(mousePos.x +',' + mousePos.y);
     websocket.send(posJson);
    }, false);
+  canvas.addEventListener("contextmenu", function(evt) {
+    if (evt.button==2) {
+      evt.preventDefault();
+      return false;
+    }
+  }, false);
 
   // 获取鼠标坐标，只保留整数部分
   function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
       x: parseInt(evt.clientX - rect.left),
-      y: parseInt(evt.clientY - rect.top)
+      y: parseInt(evt.clientY - rect.top),
+      button: evt.button
     };
   }
 
