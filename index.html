@@ -70,9 +70,9 @@
           fillRect(color, left, top, width, height);
           break;
         case 5:
-          var bmpLen = (data[13]<<24)+(data[14]<<16)+(data[15]<<8)+data[16]
+          var bmpLen = (data[13]<<24)+(data[14]<<16)+(data[15]<<8)+data[16];
           console.log("bitmap len:" + bmpLen);
-          drawImage(left, top, width, height, data.slice(17))
+          drawImage(left, top, width, height, Array.prototype.slice.call(data, 17));
           break;
       }
     } else if (evt.data instanceof String) {
