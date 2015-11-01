@@ -76,6 +76,8 @@ func wsHandler(ws *websocket.Conn) {
 	log.Printf("id:0x%x", id)
 
 	go wsWorker(ws, c1, wsClosed)
+	context := Rdp_new(id)
+	rdp_ran := false
 
 forLoop:
 	for {
@@ -90,12 +92,14 @@ forLoop:
 			}
 			switch info.Type {
 			case "login":
+				rdp_ran = true
 				chans[id] = wschan
 				defer delete(chans, id)
-				context := Rdp_new(id)
 				setRdpInfo(context, info)
 				go Rdp_start(context)
 				defer Rdp_stop(context)
+			case "btnPre", "btnRel":
+				ProcessRDPEvent(context.instance, info)
 			}
 			// 根据坐标回复颜色值
 			// msg1 = "#" + strconv.FormatInt(int64(info.X*10), 16) + strconv.FormatInt(int64(info.Y*10), 16)
@@ -106,6 +110,9 @@ forLoop:
 			log.Printf("wsClosed")
 			break forLoop
 		}
+	}
+	if !rdp_ran {
+		Rdp_free(context)
 	}
 	log.Println("wsHandler end======")
 }

@@ -31,7 +31,7 @@
   <canvas id="content" width="1025px" height="769px"></canvas>
 </div>
 <div class="login">
-<form id="loginForm">
+<form id="loginForm" method="post">
   <h2>login dialog</h2>
   <label>ip:<input type="text" name="ip" required="required" placeholder="server ip"/></label>
   <label>user:<input type="text" name="user" required="required" placeholder="username"/></label>
@@ -99,8 +99,16 @@
   }, false);
 
   var canvas=document.getElementById('content');
-  canvas.addEventListener("click", function (evt) {
+  canvas.addEventListener("mousedown", function (evt) {
     var mousePos = getMousePos(canvas, evt);
+    mousePos.type = "btnPre";
+    var posJson = JSON.stringify(mousePos);
+    console.log(mousePos.x +',' + mousePos.y);
+    websocket.send(posJson);
+   }, false);
+  canvas.addEventListener("mouseup", function (evt) {
+    var mousePos = getMousePos(canvas, evt);
+    mousePos.type = "btnRel";
     var posJson = JSON.stringify(mousePos);
     console.log(mousePos.x +',' + mousePos.y);
     websocket.send(posJson);

@@ -288,13 +288,18 @@ func Rdp_new(chanId int64) *C.rdpContext {
 	return context
 }
 
+func Rdp_free(context *C.rdpContext) {
+	log.Println("Rdp_free!")
+	C.freerdp_client_stop(context)
+	C.freerdp_client_context_free(context)
+}
+
 func Rdp_start(context *C.rdpContext) {
 	log.Println(C.GoString(context.instance.settings.ServerHostname))
 	C.freerdp_client_start(context)
 
 	log.Println("Rdp_start end!")
-	C.freerdp_client_stop(context)
-	C.freerdp_client_context_free(context)
+	Rdp_free(context)
 }
 
 func Rdp_stop(context *C.rdpContext) {
