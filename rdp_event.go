@@ -46,5 +46,9 @@ func ProcessRDPEvent(instance *C.freerdp, info wsReadInfo) {
 		}
 		log.Printf("ProcessRDPEvent x:%d y:%d", info.X, info.Y)
 		C.webrdp_button_press(instance, flags, C.int(info.X), C.int(info.Y))
+	case "mouseMove":
+		var flags C.UINT16 = C.PTR_FLAGS_MOVE
+		log.Printf("ProcessRDPEvent x:%d y:%d", info.X, info.Y)
+		C.webrdp_button_press(instance, flags, C.int(info.X), C.int(info.Y))
 	}
 }

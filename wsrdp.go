@@ -99,8 +99,10 @@ forLoop:
 				setRdpInfo(context, info)
 				go Rdp_start(context)
 				defer Rdp_stop(context)
-			case "btnPre", "btnRel":
-				ProcessRDPEvent(context.instance, info)
+			case "btnPre", "btnRel", "mouseMove":
+				if rdp_ran {
+					ProcessRDPEvent(context.instance, info)
+				}
 			}
 			// 根据坐标回复颜色值
 			// msg1 = "#" + strconv.FormatInt(int64(info.X*10), 16) + strconv.FormatInt(int64(info.Y*10), 16)

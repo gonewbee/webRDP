@@ -1,5 +1,4 @@
 # go build -ldflags "-r=/home/zsy/Workspace/code/ubuntu14/FreeRDP/libfreerdp" -v main.go
-# go build -ldflags "-r=/workspace/FreeRDP/libfreerdp:/workspace/FreeRDP/client/common:/workspace/FreeRDP/winpr/libwinpr" -v .
 # export FREERDP_PATH=/home/zsy/Workspace/code/FreeRDP
 export FREERDP_PATH=/workspace/FreeRDP
 export CGO_CFLAGS="-I$FREERDP_PATH/include -I$FREERDP_PATH/winpr/include"

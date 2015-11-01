@@ -27,7 +27,6 @@
 </head>
 <body>
 <div class="main">
-  <h3>画布</h3>
   <canvas id="content" width="1025px" height="769px"></canvas>
 </div>
 <div class="login">
@@ -109,6 +108,13 @@
   canvas.addEventListener("mouseup", function (evt) {
     var mousePos = getMousePos(canvas, evt);
     mousePos.type = "btnRel";
+    var posJson = JSON.stringify(mousePos);
+    console.log(mousePos.x +',' + mousePos.y);
+    websocket.send(posJson);
+   }, false);
+  canvas.addEventListener("mousemove", function (evt) {
+    var mousePos = getMousePos(canvas, evt);
+    mousePos.type = "mouseMove";
     var posJson = JSON.stringify(mousePos);
     console.log(mousePos.x +',' + mousePos.y);
     websocket.send(posJson);
