@@ -24,42 +24,44 @@ extern BOOL webRdpBitmapNew(rdpContext* context, rdpBitmap* bitmap);
 extern void webRdpBitmapFree(rdpContext* context, rdpBitmap* bitmap);
 extern BOOL webRdpBitmapPaint(rdpContext* context, rdpBitmap* bitmap);
 extern BOOL webRdpBitmapDecompress(rdpContext* context, rdpBitmap* bitmap,
-		BYTE* data, int width, int height, int bpp, int length,
-		BOOL compressed, int codec_id);
+        BYTE* data, int width, int height, int bpp, int length,
+        BOOL compressed, int codec_id);
 extern BOOL webRdpBitmapSetSurface(rdpContext* context, rdpBitmap* bitmap, BOOL primary);
 
 static int RdpClientEntry(RDP_CLIENT_ENTRY_POINTS* pEntryPoints) {
-	pEntryPoints->Version = 1;
-	pEntryPoints->Size = sizeof(RDP_CLIENT_ENTRY_POINTS_V1);
-	pEntryPoints->GlobalInit = webfreerdp_client_global_init;
-	pEntryPoints->GlobalUninit = webfreerdp_client_global_uninit;
-	pEntryPoints->ContextSize = sizeof(webContext);
-	pEntryPoints->ClientNew = webfreerdp_client_new;
-	pEntryPoints->ClientFree = webfreerdp_client_free;
-	pEntryPoints->ClientStart = webfreerdp_client_start;
-	pEntryPoints->ClientStop = webfreerdp_client_stop;
-	return 0;
+    pEntryPoints->Version = 1;
+    pEntryPoints->Size = sizeof(RDP_CLIENT_ENTRY_POINTS_V1);
+    pEntryPoints->GlobalInit = webfreerdp_client_global_init;
+    pEntryPoints->GlobalUninit = webfreerdp_client_global_uninit;
+    pEntryPoints->ContextSize = sizeof(webContext);
+    pEntryPoints->ClientNew = webfreerdp_client_new;
+    pEntryPoints->ClientFree = webfreerdp_client_free;
+    pEntryPoints->ClientStart = webfreerdp_client_start;
+    pEntryPoints->ClientStop = webfreerdp_client_stop;
+    return 0;
 }
 
 static void setFuncInClient(freerdp *instance, rdpContext* context) {
-	webContext* xfc = (webContext*) instance->context;
-	xfc->clrconv = freerdp_clrconv_new(CLRCONV_ALPHA|CLRCONV_INVERT);
-	context->channels = freerdp_channels_new();
-	instance->PreConnect = web_pre_connect;
-	instance->PostConnect = web_post_connect;
-	instance->Authenticate = web_authenticate;
-	instance->VerifyCertificate = web_verify_certificate;
+    webContext* xfc = (webContext*) instance->context;
+    xfc->clrconv = freerdp_clrconv_new(CLRCONV_ALPHA|CLRCONV_INVERT);
+    context->channels = freerdp_channels_new();
+    instance->PreConnect = web_pre_connect;
+    instance->PostConnect = web_post_connect;
+    instance->Authenticate = web_authenticate;
+    instance->VerifyCertificate = web_verify_certificate;
 }
 
 static void setContextChan(freerdp *instance, INT64 chanid) {
-	webContext* xfc = (webContext*) instance->context;
-	xfc->chanid = chanid;
+    webContext* xfc = (webContext*) instance->context;
+    xfc->chanid = chanid;
 }
 
 static void web_pre_connect_set(freerdp *instance) {
-	rdpSettings* settings;
-	settings = instance->settings;
-	settings->RemoteFxCodec = 0;
+    rdpSettings* settings;
+
+    settings = instance->settings;
+    fprintf(stdout, "%s BitmapCacheEnabled::%d\n", __func__, settings->BitmapCacheEnabled);
+    settings->RemoteFxCodec = 0;
     settings->FastPathOutput = 1;
     settings->ColorDepth = 32;//16;
     settings->FrameAcknowledge = 1;
@@ -79,11 +81,11 @@ static void web_pre_connect_set(freerdp *instance) {
     settings->OrderSupport[NEG_MULTI_DRAWNINEGRID_INDEX] = FALSE;
     settings->OrderSupport[NEG_LINETO_INDEX] = TRUE;
     settings->OrderSupport[NEG_POLYLINE_INDEX] = TRUE;
-    settings->OrderSupport[NEG_MEMBLT_INDEX] = FALSE;
+    settings->OrderSupport[NEG_MEMBLT_INDEX] = settings->BitmapCacheEnabled;
 
     settings->OrderSupport[NEG_MEM3BLT_INDEX] = FALSE;
 
-    settings->OrderSupport[NEG_MEMBLT_V2_INDEX] = FALSE;
+    settings->OrderSupport[NEG_MEMBLT_V2_INDEX] = settings->BitmapCacheEnabled;
     settings->OrderSupport[NEG_MEM3BLT_V2_INDEX] = FALSE;
     settings->OrderSupport[NEG_SAVEBITMAP_INDEX] = FALSE;
     settings->OrderSupport[NEG_GLYPH_INDEX_INDEX] = TRUE;
@@ -96,78 +98,78 @@ static void web_pre_connect_set(freerdp *instance) {
     settings->OrderSupport[NEG_ELLIPSE_SC_INDEX] = FALSE;
     settings->OrderSupport[NEG_ELLIPSE_CB_INDEX] = FALSE;
 
-	settings->GlyphSupportLevel = GLYPH_SUPPORT_NONE;
+    settings->GlyphSupportLevel = GLYPH_SUPPORT_NONE;
 
-	if (!instance->context->cache)
-		instance->context->cache = cache_new(instance->settings);
+    if (!instance->context->cache)
+        instance->context->cache = cache_new(instance->settings);
 }
 
 static BOOL web_register_graphics(rdpGraphics* graphics) {
-	rdpBitmap* bitmap = NULL;
-	rdpPointer* pointer = NULL;
-	rdpGlyph* glyph = NULL;
-	BOOL ret = FALSE;
+    rdpBitmap* bitmap = NULL;
+    rdpPointer* pointer = NULL;
+    rdpGlyph* glyph = NULL;
+    BOOL ret = FALSE;
 
-	if (!(bitmap = (rdpBitmap*) calloc(1, sizeof(rdpBitmap))))
-		goto out;
+    if (!(bitmap = (rdpBitmap*) calloc(1, sizeof(rdpBitmap))))
+        goto out;
 
-	if (!(pointer = (rdpPointer*) calloc(1, sizeof(rdpPointer))))
-		goto out;
+    if (!(pointer = (rdpPointer*) calloc(1, sizeof(rdpPointer))))
+        goto out;
 
-	if (!(glyph = (rdpGlyph*) calloc(1, sizeof(rdpGlyph))))
-		goto out;
+    if (!(glyph = (rdpGlyph*) calloc(1, sizeof(rdpGlyph))))
+        goto out;
 
-	bitmap->size = sizeof(web_rdp_bitmap);
-	bitmap->New = webRdpBitmapNew;
-	bitmap->Free = webRdpBitmapFree;
-	bitmap->Paint = webRdpBitmapPaint;
-	bitmap->Decompress = webRdpBitmapDecompress;
-	bitmap->SetSurface = webRdpBitmapSetSurface;
+    bitmap->size = sizeof(web_rdp_bitmap);
+    bitmap->New = webRdpBitmapNew;
+    bitmap->Free = webRdpBitmapFree;
+    bitmap->Paint = webRdpBitmapPaint;
+    bitmap->Decompress = webRdpBitmapDecompress;
+    bitmap->SetSurface = webRdpBitmapSetSurface;
 
-	graphics_register_bitmap(graphics, bitmap);
+    graphics_register_bitmap(graphics, bitmap);
 
-	ret = TRUE;
+    ret = TRUE;
 
 out:
-	free(bitmap);
-	free(pointer);
-	free(glyph);
+    free(bitmap);
+    free(pointer);
+    free(glyph);
 
-	return ret;
+    return ret;
 }
 
 static void web_client_func(freerdp* instance) {
-	BOOL status;
-	DWORD nCount;
-	DWORD waitStatus;
-	HANDLE handles[64];
-	rdpContext* context;
-	webContext* xfc;
+    BOOL status;
+    DWORD nCount;
+    DWORD waitStatus;
+    HANDLE handles[64];
+    rdpContext* context;
+    webContext* xfc;
 
-	context = instance->context;
-	status = freerdp_connect(instance);
+    context = instance->context;
+    status = freerdp_connect(instance);
 
-	xfc = (webContext*) instance->context;
-	while (!xfc->disconnect && !freerdp_shall_disconnect(instance)) {
-		nCount = 0;
-		DWORD tmp = freerdp_get_event_handles(context, &handles[nCount], 64 - nCount);
-		if (tmp == 0)
-		{
-			fprintf(stderr, "freerdp_get_event_handles failed\n");
-			break;
-		}
-		nCount += tmp;
+    xfc = (webContext*) instance->context;
+    while (!xfc->disconnect && !freerdp_shall_disconnect(instance)) {
+        nCount = 0;
+        DWORD tmp = freerdp_get_event_handles(context, &handles[nCount], 64 - nCount);
+        if (tmp == 0)
+        {
+            fprintf(stderr, "freerdp_get_event_handles failed\n");
+            break;
+        }
+        nCount += tmp;
 
-		waitStatus = WaitForMultipleObjects(nCount, handles, FALSE, 100);
+        waitStatus = WaitForMultipleObjects(nCount, handles, FALSE, 100);
 
-		if (!freerdp_check_event_handles(context))
-		{
-			fprintf(stderr, "Failed to check FreeRDP file descriptor\n");
-			break;
-		}
-	}
-	fprintf(stdout, "web_client_func==========end\n");
-	freerdp_disconnect(instance);
+        if (!freerdp_check_event_handles(context))
+        {
+            fprintf(stderr, "Failed to check FreeRDP file descriptor\n");
+            break;
+        }
+    }
+    fprintf(stdout, "web_client_func==========end\n");
+    freerdp_disconnect(instance);
 }
 */
 import "C"

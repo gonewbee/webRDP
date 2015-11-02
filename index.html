@@ -41,6 +41,7 @@
 <script type="text/javascript">
   var wsServer = "ws://"+window.location.host+"/wsDemo";
   var websocket = new WebSocket(wsServer);
+  var canvasShow = false;
   websocket.binaryType = "arraybuffer";
   websocket.onopen = function() {
     console.log("Connected to WebSocket server");
@@ -49,6 +50,11 @@
     console.log("Disconnected!");
   }; 
   websocket.onmessage = function(evt) {
+    if (!canvasShow) {
+      canvasShow = true;
+      document.querySelector(".login").classList.add("hide");
+      document.querySelector(".main").classList.remove("hide");
+    }
     if (evt.data instanceof ArrayBuffer) {
       var data = new Uint8Array(evt.data);
       var type = data[0];
@@ -94,8 +100,6 @@
     data.passwd = this["passwd"].value;
     console.log(data);
     websocket.send(JSON.stringify(data));
-    document.querySelector(".login").classList.add("hide");
-    document.querySelector(".main").classList.remove("hide");
   }, false);
 
   var canvas=document.getElementById('content');
