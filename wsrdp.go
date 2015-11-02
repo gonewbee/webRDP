@@ -122,7 +122,7 @@ forLoop:
 
 func main() {
 	port := "8080"
-	http.Handle("/", http.FileServer(http.Dir("/workspace/webRDP/")))
+	http.Handle("/", http.FileServer(http.Dir("./")))
 	http.Handle("/wsDemo", websocket.Handler(wsHandler))
 	log.Println("listen 8080")
 	log.Fatal(http.ListenAndServe(":"+port, nil))

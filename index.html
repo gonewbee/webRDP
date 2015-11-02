@@ -26,7 +26,7 @@
   </style>
 </head>
 <body>
-<div class="main">
+<div class="main hide">
   <canvas id="content" width="1025px" height="769px"></canvas>
 </div>
 <div class="login">
@@ -95,6 +95,7 @@
     console.log(data);
     websocket.send(JSON.stringify(data));
     document.querySelector(".login").classList.add("hide");
+    document.querySelector(".main").classList.remove("hide");
   }, false);
 
   var canvas=document.getElementById('content');
