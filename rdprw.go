@@ -28,6 +28,11 @@ func writeByChen(context *C.rdpContext, info RdpDrawInfo) {
 	log.Println("writeByChen try to send---------------")
 	wschan := chans[int64(C.getWSChan(context))]
 	log.Println(wschan)
+	if nil == wschan {
+		xfc := convert2webContext(context)
+		xfc.disconnect = C.TRUE
+		return
+	}
 	data := make([]byte, 17)
 	data[0] = info.Type
 	binary.BigEndian.PutUint16(data[1:], info.Left)
@@ -36,9 +41,9 @@ func writeByChen(context *C.rdpContext, info RdpDrawInfo) {
 	binary.BigEndian.PutUint16(data[7:], info.Height)
 	binary.BigEndian.PutUint32(data[9:], info.Color)
 	log.Printf("%x %x %x %x", data[9], data[10], data[11], data[12])
-	if info.BmpLen != 0 {
-		binary.BigEndian.PutUint32(data[13:], info.BmpLen)
-		data = append(data, info.Bmp...)
+	if info.ImgLen != 0 {
+		binary.BigEndian.PutUint32(data[13:], info.ImgLen)
+		data = append(data, info.Img...)
 		log.Println(cap(data))
 	}
 	select {

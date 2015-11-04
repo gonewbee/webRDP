@@ -15,6 +15,11 @@ static BYTE* getBYTEpalette(rdpContext* context) {
 */
 import "C"
 import (
+	"bufio"
+	"bytes"
+	"image"
+	"image/color"
+	"image/png"
 	"log"
 	"unsafe"
 )
@@ -39,16 +44,33 @@ func webRdpBitmapPaint(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 	log.Println("webRdpBitmapPaint")
 	log.Printf("webRdpBitmapPaint length:%d", bitmap.length)
 	if bitmap.data != nil {
-		bs := C.GoBytes(unsafe.Pointer(bitmap.data), C.int(bitmap.length))
-		log.Printf("%x %x %x %x %x %x %x %x", bs[0], bs[1], bs[2], bs[3], bs[4], bs[5], bs[6], bs[7])
+		w := int(bitmap.width)
+		h := int(bitmap.height)
+		data := C.GoBytes(unsafe.Pointer(bitmap.data), C.int(bitmap.length))
+		img := image.NewRGBA(image.Rect(0, 0, w, h))
+		var c color.RGBA
+		i := 0
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				c = color.RGBA{data[i+2], data[i+1], data[i], 255}
+				i += 4
+				img.Set(x, y, c)
+			}
+		}
+		log.Printf("%x %x %x %x %x %x %x %x", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])
+		var b bytes.Buffer
+		foo := bufio.NewWriter(&b)
+		png.Encode(foo, img)
+		foo.Flush()
+		png := b.Bytes()
 		info := RdpDrawInfo{}
-		info.Type = 5
+		info.Type = 7
 		info.Left = uint16(bitmap.left)
 		info.Top = uint16(bitmap.top)
 		info.Width = uint16(bitmap.width)
 		info.Height = uint16(bitmap.height)
-		info.Bmp = bs
-		info.BmpLen = uint32(bitmap.length)
+		info.Img = png
+		info.ImgLen = uint32(len(png))
 		writeByChen(context, info)
 	}
 	return C.TRUE

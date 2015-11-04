@@ -27,8 +27,8 @@ type RdpDrawInfo struct {
 	Top    uint16 `json:"top"`
 	Width  uint16 `json:"width"`
 	Height uint16 `json:"height"`
-	Bmp    []byte `json:"bmp,omitempty"`
-	BmpLen uint32 `json:"bmplen,omitempty"`
+	Img    []byte `json:"img,omitempty"`
+	ImgLen uint32 `json:"imglen,omitempty"`
 }
 
 var chans = make(map[int64]chan []byte)

@@ -77,7 +77,12 @@
         case 5:
           var bmpLen = (data[13]<<24)+(data[14]<<16)+(data[15]<<8)+data[16];
           console.log("bitmap len:" + bmpLen);
-          drawImage(left, top, width, height, Array.prototype.slice.call(data, 17));
+          drawBmp(left, top, width, height, Array.prototype.slice.call(data, 17));
+          break;
+        case 7:
+          var len = (data[13]<<24)+(data[14]<<16)+(data[15]<<8)+data[16];
+          console.log("png len:" + len);
+          drawPng(left, top, width, height, Array.prototype.slice.call(data, 17));
           break;
       }
     } else if (evt.data instanceof String) {
@@ -151,7 +156,7 @@
     return rgba;
   }
 
-  function drawImage(x, y, w, h, bmp) {
+  function drawBmp(x, y, w, h, bmp) {
     var ctx=canvas.getContext('2d');
     var imageData = ctx.getImageData(x, y, w, h);
     var data = imageData.data;
@@ -163,6 +168,16 @@
       data[i+3] = 255; //bmp[i+3]; // A
     }
     ctx.putImageData(imageData, x, y);
+  }
+
+  function drawPng(x, y, w, h, png) {
+    var ctx=canvas.getContext('2d');
+    var base64Data = btoa(String.fromCharCode.apply(null, png));
+    var img = new Image();
+    img.onload = function(e) {
+      ctx.drawImage(img, x, y);
+    };
+    img.src = 'data:image/png;base64,' + base64Data;
   }
 
   function fillRect(color, x, y, w, h) {
