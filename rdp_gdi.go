@@ -54,13 +54,13 @@ import (
 //export webRDPend_paint
 func webRDPend_paint(context *C.rdpContext) C.BOOL {
 	// log.Println("webRDPend_paint")
-	return C.TRUE
+	return true
 }
 
 //export webRDPdesktop_resize
 func webRDPdesktop_resize(context *C.rdpContext) C.BOOL {
 	log.Println("webRDPdesktop_resize")
-	return C.TRUE
+	return true
 }
 
 //export webRDPdstblt
@@ -73,25 +73,25 @@ func webRDPdstblt(context *C.rdpContext, dstblt *C.DSTBLT_ORDER) C.BOOL {
 	info.Width = uint16(dstblt.nWidth)
 	info.Height = uint16(dstblt.nHeight)
 	writeByChen(context, info)
-	return C.TRUE
+	return true
 }
 
 //export webRDPpatblt
 func webRDPpatblt(context *C.rdpContext, patblt *C.PATBLT_ORDER) C.BOOL {
 	log.Println("webRDPpatblt")
-	return C.TRUE
+	return true
 }
 
 //export webRDPscrblt
 func webRDPscrblt(context *C.rdpContext, scrblt *C.SCRBLT_ORDER) C.BOOL {
 	log.Println("webRDPscrblt")
-	return C.TRUE
+	return true
 }
 
 //export webRDPmemblt
 func webRDPmemblt(context *C.rdpContext, memblt *C.MEMBLT_ORDER) C.BOOL {
 	log.Println("webRDPmemblt")
-	return C.TRUE
+	return true
 }
 
 //export webRDPopaquerect
@@ -107,13 +107,13 @@ func webRDPopaquerect(context *C.rdpContext, opaque_rect *C.OPAQUE_RECT_ORDER) C
 	info.Width = uint16(opaque_rect.nWidth)
 	info.Height = uint16(opaque_rect.nHeight)
 	writeByChen(context, info)
-	return C.TRUE
+	return true
 }
 
 //export webRDPpalette_update
 func webRDPpalette_update(context *C.rdpContext, palette *C.PALETTE_UPDATE) C.BOOL {
 	log.Println("webRDPpalette_update")
-	return C.TRUE
+	return true
 }
 
 func webGdiRegisterUpdateCallbacks(update *C.rdpUpdate) {

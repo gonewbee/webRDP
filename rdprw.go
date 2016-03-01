@@ -30,7 +30,7 @@ func writeByChen(context *C.rdpContext, info RdpDrawInfo) {
 	log.Println(wschan)
 	if nil == wschan {
 		xfc := convert2webContext(context)
-		xfc.disconnect = C.TRUE
+		xfc.disconnect = true
 		return
 	}
 	data := make([]byte, 17)
@@ -52,6 +52,6 @@ func writeByChen(context *C.rdpContext, info RdpDrawInfo) {
 	case <-time.After(time.Second * 3):
 		log.Println("send time out")
 		xfc := convert2webContext(context)
-		xfc.disconnect = C.TRUE
+		xfc.disconnect = true
 	}
 }

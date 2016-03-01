@@ -17,7 +17,7 @@ extern int webfreerdp_client_stop(rdpContext* context);
 extern BOOL web_pre_connect(freerdp* instance);
 extern BOOL web_post_connect(freerdp* instance);
 extern BOOL web_authenticate(freerdp* instance, char** username, char** password, char** domain);
-extern BOOL web_verify_certificate(freerdp* instance, char* subject, char* issuer, char* fingerprint);
+extern DWORD web_verify_certificate(freerdp* instance, char* subject, char* issuer, char* fingerprint);
 
 
 extern BOOL webRdpBitmapNew(rdpContext* context, rdpBitmap* bitmap);
@@ -48,7 +48,7 @@ static void setFuncInClient(freerdp *instance, rdpContext* context) {
     instance->PreConnect = web_pre_connect;
     instance->PostConnect = web_post_connect;
     instance->Authenticate = web_authenticate;
-    instance->VerifyCertificate = web_verify_certificate;
+//    instance->VerifyCertificate = web_verify_certificate;
 }
 
 static void setContextChan(freerdp *instance, INT64 chanid) {
@@ -190,7 +190,7 @@ func test() {
 func web_pre_connect(instance *C.freerdp) C.BOOL {
 	log.Println("web_pre_connect")
 	C.web_pre_connect_set(instance)
-	return C.TRUE
+	return true
 }
 
 //export web_post_connect
@@ -207,25 +207,25 @@ func web_post_connect(instance *C.freerdp) C.BOOL {
 	C.offscreen_cache_register_callbacks(update)
 	C.palette_cache_register_callbacks(update)
 	log.Println("web_post_connect end")
-	return C.TRUE
+	return true
 }
 
 //export web_authenticate
 func web_authenticate(instance *C.freerdp, username, password, domain **C.char) C.BOOL {
 	log.Println("web_authenticate")
-	return C.TRUE
+	return true
 }
 
 //export web_verify_certificate
-func web_verify_certificate(instance *C.freerdp, subject, issuer, fingerprint *C.char) C.BOOL {
+func web_verify_certificate(instance *C.freerdp, subject, issuer, fingerprint *C.char) C.DWORD {
 	log.Println("web_verify_certificate")
-	return C.TRUE
+	return 0
 }
 
 //export webfreerdp_client_global_init
 func webfreerdp_client_global_init() C.BOOL {
 	log.Println("webfreerdp_client_global_init")
-	return C.BOOL(C.TRUE)
+	return true
 }
 
 //export webfreerdp_client_global_uninit
@@ -237,7 +237,7 @@ func webfreerdp_client_global_uninit() {
 func webfreerdp_client_new(instance *C.freerdp, context *C.rdpContext) C.BOOL {
 	log.Println("webfreerdp_client_new")
 	C.setFuncInClient(instance, context)
-	return C.TRUE
+	return true
 }
 
 //export webfreerdp_client_free
@@ -307,5 +307,5 @@ func Rdp_start(context *C.rdpContext) {
 func Rdp_stop(context *C.rdpContext) {
 	log.Println("Rdp_stop set disconnect----------")
 	xfc := convert2webContext(context)
-	xfc.disconnect = C.TRUE
+	xfc.disconnect = true
 }

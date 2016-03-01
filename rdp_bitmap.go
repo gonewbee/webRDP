@@ -30,7 +30,7 @@ func webRdpBitmapNew(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 	// if bitmap.data != nil {
 	// 	log.Printf("l:%d t:%d r:%d b:%d w:%d h:%d", bitmap.left, bitmap.top, bitmap.right, bitmap.bottom, bitmap.width, bitmap.height)
 	// }
-	return C.TRUE
+	return true
 }
 
 //export webRdpBitmapFree
@@ -73,7 +73,7 @@ func webRdpBitmapPaint(context *C.rdpContext, bitmap *C.rdpBitmap) C.BOOL {
 		info.ImgLen = uint32(len(png))
 		writeByChen(context, info)
 	}
-	return C.TRUE
+	return true
 }
 
 //export webRdpBitmapDecompress
@@ -86,7 +86,7 @@ func webRdpBitmapDecompress(context *C.rdpContext, bitmap *C.rdpBitmap, data *C.
 		C._aligned_free(unsafe.Pointer(bitmap.data))
 	}
 	bitmap.data = (*C.BYTE)(C._aligned_malloc(C.size_t(size), 16))
-	if compressed != C.FALSE {
+	if compressed != false {
 		if bpp < 32 {
 			C.freerdp_client_codecs_prepare(context.codecs, C.FREERDP_CODEC_INTERLEAVED)
 			C.interleaved_decompress(context.codecs.interleaved, data, C.UINT32(length), bpp,
@@ -94,20 +94,20 @@ func webRdpBitmapDecompress(context *C.rdpContext, bitmap *C.rdpBitmap, data *C.
 		} else {
 			C.freerdp_client_codecs_prepare(context.codecs, C.FREERDP_CODEC_PLANAR)
 			status := C.planar_decompress(context.codecs.planar, data, C.UINT32(length),
-				&(bitmap.data), C.PIXEL_FORMAT_XRGB32, -1, 0, 0, width, height, C.TRUE)
+				&(bitmap.data), C.PIXEL_FORMAT_XRGB32, -1, 0, 0, width, height, true)
 			log.Printf("webRdpBitmapDecompress status::::::%d", status)
 		}
 	} else {
 		C.freerdp_image_flip(data, bitmap.data, width, height, bpp)
 	}
-	bitmap.compressed = C.FALSE
+	bitmap.compressed = false
 	bitmap.length = C.UINT32(size)
 	bitmap.bpp = 32
-	return C.TRUE
+	return true
 }
 
 //export webRdpBitmapSetSurface
 func webRdpBitmapSetSurface(context *C.rdpContext, bitmap *C.rdpBitmap, primary C.BOOL) C.BOOL {
 	log.Println("webRdpBitmapSetSurface")
-	return C.TRUE
+	return true
 }
